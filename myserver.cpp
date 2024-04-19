@@ -1,19 +1,40 @@
-#include "accepter.h"
-#include "queue.h"
-#include "list.h"
-#include "receiver.h"
-#include "util.h"
+#include "myserver.h"
+#include <thread>
 #include <SFML/Network.hpp>
 #include <iostream>
-#include <thread>
+#include "queue.h"
+#include "list.h"
+#include "accepter.h"
 
-
-int main()
+myserver::myserver()
 {
+
+}
+
+void myserver::run()
+{
+    auto runUdpLoop = [] () 
+    {
+        sf::UdpSocket udpSocket;
+        while(true)
+        {
+            // recv message
+            char udpMsg[256];
+            std::size_t size;
+            sf::IpAddress serverAddress;
+            unsigned short remote_port;
+            sf::Socket::Status status = udpSocket.receive(udpMsg, 256, size, serverAddress, remote_port);
+            // TODO send a message back
+            udpSocket.send(udpMsg, size, serverAddress, remote_port);
+        }
+    };
+    std::thread { runUdpLoop }.detach();
+
+    // TODO copy from server.cpp
     Queue<std::string> queue;
     List<std::shared_ptr<sf::TcpSocket>> sockets;
+    
     // TODO launch an accepter thread.
-
     std::thread reciever_thread(Accepter(queue, sockets));
 
     while(1)
@@ -33,5 +54,5 @@ int main()
         sockets.for_each(sendMessage);
     }
     reciever_thread.join();
-    return 0;
+    return;
 }

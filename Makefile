@@ -8,12 +8,9 @@ LDLIBS=
 LIBS=
 CPP=g++
 
-all: client server
+all: client
 
-server: server.o accepter.o receiver.o
-	$(CPP) $(CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@ $(CFLAGS)
-
-client: client.o receiver.o
+client: accepter.o client.o receiver.o myserver.o
 	$(CPP) $(CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@ $(CFLAGS)
 
 clean:

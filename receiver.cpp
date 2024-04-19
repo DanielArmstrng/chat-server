@@ -31,6 +31,7 @@ void Receiver::recv_loop()
         {
             // Error: output a message then quit the function
             std::cout << "Nothing was recieved." << std::endl;
+            return;
         }
         {
             std::stringstream ss;
