@@ -27,11 +27,14 @@ void game::victory()
         w = new world(window, this);
         w->setup();
     }
+<<<<<<< HEAD
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
     {
         std::cout << "Terminate" << std::endl;
         state = gamestate::terminate;
     }
+=======
+>>>>>>> Santorini
 }
 
 void game::defeat()

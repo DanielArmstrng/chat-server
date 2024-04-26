@@ -21,3 +21,6 @@ Things can be factorised: most things can fit within a single class.
 
 We need a thread for the client, the server, the accepter and the receivers,
 but they don't need to be in individual classes.
+
+
+TEST TEST TEST
