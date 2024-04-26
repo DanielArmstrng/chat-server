@@ -28,6 +28,7 @@ void myserver::run()
             udpSocket.send(udpMsg, size, serverAddress, remote_port);
         }
     };
+    
     std::thread { runUdpLoop }.detach();
 
     // TODO copy from server.cpp
