@@ -13,7 +13,7 @@ all: client
 client: main.o entity.o tile.o builder.o world.o game.o client.o myserver.o 
 	$(CPP) $(CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@ $(CFLAGS)
 
-server: accepter.o receiver.o myserver.o message.o
+server: accepter.o receiver.o myserver.o message.o network.o
 	$(CPP) $(CXXFLAGS) $(LDFLAGS) $(LIBS) $^ -o $@ $(CFLAGS)
 	
 clean:

@@ -6,32 +6,23 @@
 #include <iostream>
 #include <thread>
 
-// create a udp socket 
-// send a message to the broadcast address
-// wait 1 second
-// set the udp socket to non blocking
-// receive
-// if receive worked, we know the address for the server
-// if not, make a thread that runs the server
-// wait a bit
-
 int main()
 {
-    // UDP bcast
+    //UDP broadcast
     sf::UdpSocket udpSocket;
-    std::string bcast_msg = "are you a server?";
+    std::string bcast_msg = "Are you a server?";
     udpSocket.send(bcast_msg.c_str(), bcast_msg.size() + 1, sf::IpAddress::Broadcast, PORT + 1);
-    // set udp socket to non blocking
+    //set udp socket to non blocking
     udpSocket.setBlocking(false);
-    // wait 1s
+    //waits 1s
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    // recv
+    //recv
     char udpMsg[256];
     std::size_t size;
     sf::IpAddress serverAddress;
     unsigned short remote_port;
     sf::Socket::Status status = udpSocket.receive(udpMsg, 256, size, serverAddress, remote_port);
-    // TODO if there is an answer connect to it
+    //if there is an answer connect to it
     if(status != sf::Socket::Done)
     {
         serverAddress = sf::IpAddress::LocalHost;
@@ -40,10 +31,6 @@ int main()
         runServer.detach();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
-
-    // otherwise create a server using a thread
-
-    // then wait one second, then connect locally
 
     std::shared_ptr<sf::TcpSocket> socket = std::make_shared<sf::TcpSocket>();
     status = socket->connect(serverAddress, PORT);
@@ -54,7 +41,7 @@ int main()
     
     std::cout << "Connected\n";
     Queue<std::string> queue;
-    // TODO launch a receiver thread to receive messages from the server.
+    //launches a receiver thread to receive messages from the server.
     Receiver receiver(socket, queue);
     std::thread recv_thread(&Receiver::recv_loop, &receiver);
 
@@ -63,7 +50,7 @@ int main()
     {
         std::getline(std::cin, s);
         std::cout << "Sending: \"" << s << "\"" << std::endl;
-        // TODO send messages to the server
+        //sends messages to the server
         std::size_t sent;
         if (socket->send(s.c_str(), s.size() + 1, sent) != sf::Socket::Done) 
         {

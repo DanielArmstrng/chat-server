@@ -6,6 +6,7 @@
 
 Network::Network(Queue<Message>& queue) : queue(queue) 
 {
+	//Send UDP message to find server
 	sf::UdpSocket socket;
 	sf::Packet packet;
 	packet << "Are you a server?";
@@ -15,6 +16,7 @@ Network::Network(Queue<Message>& queue) : queue(queue)
 	net_run(sendUDP, "UDP send");
 	std::cout << "Sent UDP message" << std::endl;
 
+	//Recieve UDP message from server
 	packet.clear();
 	sf::IpAddress address;
 	udpSocket.setBlocking(false);
@@ -54,6 +56,7 @@ Network::~Network()
 
 void Network::reg(const sf::Uint32 id)
 {
+	//Register client with an id and a name
 	sf::Packet m_reg_packet;
 	m_reg_packet << MessageReg(id, "Daniel");
 	auto send1 = [&] { return socket->send(m_reg_packet); };

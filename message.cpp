@@ -3,18 +3,22 @@
 #include <string>
 #include <memory>
 
-sf::Packet& operator <<(sf::Packet& packet, const MessageType mtype)
+sf::Packet& operator << (sf::Packet& packet, const MessageType mtype)
 {
+	//Inserts a byte into the packet
 	return packet << static_cast<sf::Uint8>(mtype);
 }
 
 sf::Packet& operator >>(sf::Packet& packet, MessageType& mtype)
 {
+	//Extracts a byte from the packet
 	sf::Uint8 type;
 	packet >> type;
 	mtype = static_cast<MessageType>(type);
 	return packet;
 }
+
+//Inserts messages into the packet
 
 sf::Packet& operator << (sf::Packet& packet, const MessageReg message)
 {

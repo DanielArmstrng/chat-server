@@ -17,6 +17,7 @@ myserver::myserver()
 
 void myserver::run()
 {
+    //Binds the udp socket to the port
     sf::UdpSocket socket;
     auto runBind = [&socket] { return socket.bind(UPORT); };
     net_run(runBind, "UDP bind");
@@ -27,6 +28,7 @@ void myserver::run()
 
     while (true)
     {
+        //Responds to broadcasted messages
         packet.clear();
         auto runRecv = [&] { return usocket.receive(packet, address, remote_port); };
         net_run(runRecv, "UDP receive");
@@ -49,11 +51,13 @@ void myserver::operator()()
     
     while (true)
     {
+        //Prints all clients to see information about everyone thats connected
         std::for_each(clients.begin(), clients.end(), printClient);
         Message message = queue.pop();
         Msg msg;
         readMessage(message, msg);
 		
+        //Register message that will send to all clients
         if (msg.messagetype == MessageType::Register)
         {
             sf::Packet to_send;
@@ -70,7 +74,7 @@ void myserver::operator()()
             std::for_each(clients.begin(), clients.end(), send_reg);
             clients.insert(Client(msg.id, message.socket));
         }
-
+        //Only sends to one client
         auto send_to_one = [&](const Client& client) 
         {
             auto my_send = [&] 
@@ -89,7 +93,7 @@ void myserver::operator()()
 }
 
 
-//// TODO copy from server.cpp
+////Copy from server.cpp
     //Queue<std::string> queue;
     //List<std::shared_ptr<sf::TcpSocket>> sockets;
     //

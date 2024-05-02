@@ -26,7 +26,7 @@ void Receiver::recv_loop()
     {
         std::memset(buffer, 0, 256);
         std::size_t received;
-        // TODO receive a message here
+        // Receives a message
         if (m_socket->receive(buffer, 256, received) != sf::Socket::Done) 
         {
             // Error: output a message then quit the function
@@ -34,6 +34,7 @@ void Receiver::recv_loop()
             return;
         }
         {
+            // amount of data received
             std::stringstream ss;
             ss << "Received: \"" << buffer << "\", " << received << " bytes." << std::endl;
             std::cout << ss.str();
