@@ -1,5 +1,5 @@
 #ifndef MESSAGE_HPP
-#define MESAGE_HPP
+#define MESSAGE_HPP
 
 #include "util.h"
 #include <SFML/Network.hpp>
@@ -46,9 +46,34 @@ struct MessageSelect
     MessageSelect(sf::Uint32 id_, sf::Uint8 builderID_) : id(id_), builderID(builderID_) {}
 };
 
-sf::Packet& operator >> (sf::Packet& packet, MessageSelect& mtessage);
+sf::Packet& operator >> (sf::Packet& packet, MessageSelect& message);
 sf::Packet& operator << (sf::Packet& packet, const MessageSelect message);
 
+struct MessagePos
+{
+    MessageType messagetype = MessageType::Undefined;
+    sf::Uint32 id = 0;
+    sf::Uint8 x = 0;
+    sf::Uint8 y = 0;
+    MessagePos() {}
+    MessagePos(MessageType messagetype_, sf::Uint32 id_, sf::Veector2i pos) : messagetype(messagetype_), id(id_), x(pos.x), y(pos.y) {}
+};
 
+sf::Packet& operator >> (sf::Packet& packet, MessagePos& message);
+sf::Packet& operator << (sf::Packet& packet, const MessagePos message);
+
+struct MessageRand
+{
+    MessageType messagetype = MessageType::Rand;
+    sf::Uint32 id = 0;
+    sf::Uint32 r = 0;
+    MessageRand() {}
+    MessageRand(sf::Uint32 id_, sf::Uint32 r_) : id(id_), r(r_) {}
+};
+
+sf::Packet& operator >> (sf::Packet& packet, MessageRand& message);
+sf::Packet& operator << (sf::Packet& packet, const MessageRand message);
+
+void readMessage(Message m, Message& message);
 
 #endif

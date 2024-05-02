@@ -31,13 +31,14 @@ class world {
         unsigned short buildersSoFar;
         unsigned short turn;
         std::size_t selectedBuilderIndex;
-        void build(const sf::Vector2i& pos);
-        void move(const sf::Vector2i& pos);
-        void place(const sf::Vector2i& pos);
-        void select(const sf::Vector2i& pos);
+        void build(const sf::Vector2i& pos, bool toSend);
+        void move(const sf::Vector2i& pos, bool toSend);
+        void place(const sf::Vector2i& pos, bool toSend);
+        void select(const sf::Vector2i& pos, bool toSend);
         bool noBuilder(const sf::Vector2i& pos);
         bool nearSelectecBuilder(const sf::Vector2i& pos);
         bool noDome(const sf::Vector2i& pos);
         int levelDiff(const sf::Vector2i& pos);
+        void processPlace(const Message& message);
 };
 #endif

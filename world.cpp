@@ -1,10 +1,16 @@
 #include "world.h"
 #include "game.h"
+#include <cstring>
+#include "message.h"
 
 world::world(sf::RenderWindow& w, game *g_):
     window(w),
     g(g_)
+    queue(),
+    network(queue),
 {
+    id = rand();
+    network.reg(id);
     srand(time(0));
     window.setFramerateLimit(60);
     setup();
@@ -60,20 +66,24 @@ int world::levelDiff(const sf::Vector2i& pos)
     return tiles[pos.x][pos.y].level - tiles[bpos.x][bpos.y].level;
 }
 
-void world::build(const sf::Vector2i& pos)
+void world::build(const sf::Vector2i& pos, bool toSend)
 {
     // Check if no builder is there.
     // Check if near selected builder.
     // Check if not on a dome.
     if (noBuilder(pos) && nearSelectecBuilder(pos) && noDome(pos))
     {
+        if(toSend)
+        {
+            network.send(MessagePos(MessageType::Build, id, pos));
+        }
         tiles[pos.x][pos.y].build();
         state = WorldState::Select;
         turn++;
     }
 }
 
-void world::move(const sf::Vector2i& pos)
+void world::move(const sf::Vector2i& pos, bool toSend)
 {
     // If on a builder and this builder is of the same colour, we should select this builder and
     // return.
@@ -84,6 +94,10 @@ void world::move(const sf::Vector2i& pos)
             if (builders[i].pos == pos && turn % 2 == builders[i].player)
             {
                 selectedBuilderIndex = i;
+                if(toSend)
+                {
+                    network.send(MessageSelect(id, i));
+                }
                 return;
             }
         }
@@ -110,17 +124,25 @@ void world::move(const sf::Vector2i& pos)
                 g->state = gamestate::defeat;
             }
         }
+        if(toSend)
+        {
+            network.send(MessagePos(MessageType::Build, id, pos));
+        }
         sf::Vector2i m = pos - builders[selectedBuilderIndex].pos;
         builders[selectedBuilderIndex].move(m);
         state = WorldState::Build;
     }
 }
 
-void world::place(const sf::Vector2i& pos)
+void world::place(const sf::Vector2i& pos, bool toSend)
 {
     // Check not on top of other builder.
     if (noBuilder(pos))
     {
+        if(toSend)
+        {
+            network.send(MessagePos(MessageType::Build, id, pos));
+        }
         builders.push_back(builder(pos.x, pos.y, buildersSoFar/2));
         buildersSoFar++;
         if (buildersSoFar == 4)
@@ -130,7 +152,7 @@ void world::place(const sf::Vector2i& pos)
     }
 }
 
-void world::select(const sf::Vector2i& pos)
+void world::select(const sf::Vector2i& pos, bool toSend)
 {
     // Check correct player.
     // Check builder has a valid move. TODO
@@ -140,12 +162,24 @@ void world::select(const sf::Vector2i& pos)
         {
             if (turn % 2 == builders[i].player)
             {
+                if(toSend)
+                {
+                    network.send(MessageSelect(id, i));
+                }
                 selectedBuilderIndex = i;
                 state = WorldState::Move;
                 return;
             }
         }
     }
+}
+
+void world::processPlace(const Message& message)
+{
+    MessagePos m_pos;
+    std::memcpy(&m_pos, &message, sizeof(MessagePos));
+    sf::Vector2i pos(m_pos.x, m_pos.y);
+    place(pos, false);
 }
 
 void world::update()
@@ -155,7 +189,8 @@ void world::update()
     {
         clicked = true;
         sf::Vector2i pos = sf::Mouse::getPosition(window) / TILE_SIZE;
-        switch (state) {
+        switch (state) 
+        {
             case WorldState::Build:
                 std::cout << "Build\n";
                 build(pos);
@@ -182,6 +217,46 @@ void world::update()
         {
             clicked = false;
         }
+    }
+
+    Message m;
+    queue.pop(m);
+
+    if (m.first.endOfPacket())
+    {
+        return;
+    }
+
+    Msg msg;
+    readMessage(m, msg);
+
+    switch(msg.MessageType)
+    {
+        case MessageType::Register:
+            std::cout << "Message type: register" << std::endl;
+            processRegister(msg);
+            break;
+        case MessageType::Select:
+            std::cout << "Message type: select" << std::endl;
+            processSelect(msg);
+            break;
+        case MessageType::Build:
+            std::cout << "Message type: build" << std::endl;
+            processBuild(msg);
+            break;
+        case MessageType::Move:
+            std::cout << "Message type: move" << std::endl;
+            processMove(msg);
+            break;
+        case MessageType::Rand:
+            std::cout << "Message type: rand" << std::endl;
+            break;
+        case MessageType::Place:
+            std::cout << "Message type: place" << std::endl;
+            processPlace(msg);
+            break;
+        default:
+            break;
     }
 }
 
